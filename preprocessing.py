@@ -1,15 +1,15 @@
 import psycopg2
 
 class DBMS:
-    def __init__(self):
-        self.con = self.connect()
+    def __init__(self, pw):
+        self.con = self.connect(pw)
         self.cur = self.con.cursor()
     
     def __del__(self):
         self.con.close()
 
-    def connect(self):
-        con = psycopg2.connect(database="TPC-H", user="postgres", password="root", host="127.0.0.1", port="5432")
+    def connect(self, pw):
+        con = psycopg2.connect(database="TPC-H", user="postgres", password=pw, host="127.0.0.1", port="5432")
         print("Database opened successfully")
         return con
 

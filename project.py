@@ -1,6 +1,8 @@
 import preprocessing
 
-dbms = preprocessing.DBMS()
+
+pw = input("Please enter password for postgres: ")
+dbms = preprocessing.DBMS(pw)
 
 query = dbms.getQuery()
 
