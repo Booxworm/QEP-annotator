@@ -1,8 +1,10 @@
 import glob
 import os
 
+filepath = 'path/to/file/*.csv'
+
 # Looks under the data folder for .csv files
-for filename in glob.glob('data/*.csv'):
+for filename in glob.glob(filepath):
     fin = open(filename)
 
     # Check if need to remove delimiter from end of each line
