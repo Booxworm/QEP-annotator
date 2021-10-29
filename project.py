@@ -1,18 +1,25 @@
-import preprocessing
-
-qepGraph = preprocessing.QepGraph()
+import interface
 
 pw = input("Please enter password for postgres: ")
-dbms = preprocessing.DBMS(pw)
 
-query = dbms.getQuery()
+app = interface.App(pw)
+app.mainloop()
 
-# for row in dbms.executeQuery(query):
-#     print(row)
+# import preprocessing
 
-qep = dbms.explainQuery(query)
+# qepGraph = preprocessing.QepGraph()
 
-qepGraph.createQepGraph(qep)
+# pw = input("Please enter password for postgres: ")
+# dbms = preprocessing.DBMS(pw)
+
+# query = dbms.getQuery()
+
+# # for row in dbms.executeQuery(query):
+# #     print(row)
+
+# qep = dbms.explainQuery(query)
+
+# qepGraph.createQepGraph(qep)
 
 
-print("Operation done successfully")
+# print("Operation done successfully")

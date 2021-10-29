@@ -36,6 +36,7 @@ class DBMS:
         return joined
 
     def executeQuery(self, query):
+        print(query)
         self.cur.execute(query)
         return self.cur.fetchall()
 
