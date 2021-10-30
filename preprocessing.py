@@ -3,20 +3,23 @@ import plotly.graph_objects as go
 import psycopg2
 
 from collections import deque
-from igraph import Graph, EdgeSeq
+from igraph import Graph
 
 class DBMS:
-    def __init__(self, pw):
-        self.con = self.connect(pw)
-        self.cur = self.con.cursor()
-    
     def __del__(self):
-        self.con.close()
+        if self.con:
+            self.con.close()
 
-    def connect(self, pw):
-        con = psycopg2.connect(database="TPC-H", user="postgres", password=pw, host="127.0.0.1", port="5432")
-        print("Database opened successfully")
-        return con
+    def connect(self, database='TPC-H', user='postgres', password='password', host='127.0.0.1', port='5432'):
+        try:
+            self.con = psycopg2.connect(database=database, user=user, password=password, host=host, port=port)
+            self.cur = self.con.cursor()
+            print('Database opened successfully')
+            return True
+        except:
+            self.con = None
+            print('Failed to connect to database')
+            return False
 
     def getQuery(self):
         query = []
@@ -37,7 +40,11 @@ class DBMS:
 
     def executeQuery(self, query):
         print(query)
-        self.cur.execute(query)
+        try:
+            self.cur.execute(query)
+            self.con.commit()
+        except:
+            self.con.rollback()
         return self.cur.fetchall()
 
     def explainQuery(self, query):
@@ -62,57 +69,48 @@ class QepGraph:
         nodeLabels = []
 
         while len(q) > 0:
+            # Dequeue node from queue
             node = q.popleft()
 
+            # Add one vertice to graph, and record its label
             g.add_vertices(1)
-            print('Adding node {}'.format(node['Node Type']))
             nodeLabels.append(node['Node Type'])
 
+            # Add edge to graph if parent exists
             if 'Parent' in node:
                 g.add_edges([(node['Parent'], index)])
-                print('Adding edge ({}, {})'.format(node['Parent'], index))
 
+            # Check for children of node, and enqueue
             if 'Plans' in node:
                 for plan in node['Plans']:
                     plan['Parent'] = index
                     q.append(plan)
             index += 1
         
+        # Create plot with the finished graph
         self.createPlot(g, nodeLabels)
     
     def createPlot(self, g, nodeLabels):
-        nr_vertices = len(nodeLabels)
-        # v_label = list(map(str, range(nr_vertices)))
-        print('v_label: {}'.format(nodeLabels))
-        # g = Graph.Tree(nr_vertices, 2) # 2 stands for children number
+        numNodes = len(nodeLabels)
         lay = g.layout('rt')
 
-        position = {k: lay[k] for k in range(nr_vertices)}
-        print('position: {}'.format(position))
-
-        Y = [lay[k][1] for k in range(nr_vertices)]
-        print('Y: {}'.format(Y))
-
+        position = {k: lay[k] for k in range(numNodes)}
+        Y = [lay[k][1] for k in range(numNodes)]
         M = max(Y)
 
-        es = EdgeSeq(g) # sequence of edges
         E = [e.tuple for e in g.es] # list of edges
-        print('E: {}'.format(E))
-
         L = len(position)
+
+        # X and Y coordinates of nodes
         Xn = [position[k][0] for k in range(L)]
-        print('Xn: {}'.format(Xn))
-
         Yn = [2*M-position[k][1] for k in range(L)]
-        print('Yn: {}'.format(Yn))
 
+        # X and Y coordinates of edges
         Xe = []
         Ye = []
         for edge in E:
             Xe+=[position[edge[0]][0],position[edge[1]][0], None]
             Ye+=[2*M-position[edge[0]][1],2*M-position[edge[1]][1], None]
-        print('Xe: {}'.format(Xe))
-        print('Ye: {}'.format(Ye))
 
         labels = nodeLabels
 
@@ -127,8 +125,8 @@ class QepGraph:
                         y=Yn,
                         mode='markers',
                         name='bla',
-                        marker=dict(symbol='circle-dot',
-                                        size=18,
+                        marker=dict(symbol='square',
+                                        size=50,
                                         color='#6175c1',    #'#DB4551',
                                         line=dict(color='rgb(50,50,50)', width=1)
                                         ),
@@ -137,7 +135,7 @@ class QepGraph:
                         opacity=0.8
                         ))
 
-        def make_annotations(pos, text, font_size=10, font_color='rgb(0,0,0)'):
+        def makeAnnotations(pos, text, font_size=10, font_color='rgb(0,0,0)'):
             L=len(pos)
             if len(text)!=L:
                 raise ValueError('The lists pos and text must have the same len')
@@ -146,21 +144,22 @@ class QepGraph:
                 annotations.append(
                     dict(
                         text=labels[k], # or replace labels with a different list for the text within the circle
-                        x=pos[k][0] - 0.03, y=2*M-position[k][1],
+                        x=pos[k][0], y=2*M-position[k][1],
                         xref='x1', yref='y1',
                         font=dict(color=font_color, size=font_size),
                         showarrow=False)
                 )
             return annotations
 
-        axis = dict(showline=False, # hide axis line, grid, ticklabels and  title
+        # Hide axis line, grid, ticklabels and title
+        axis = dict(showline=False,
                     zeroline=False,
                     showgrid=False,
                     showticklabels=False,
                     )
 
         fig.update_layout(
-                    annotations=make_annotations(position, nodeLabels),
+                    annotations=makeAnnotations(position, nodeLabels),
                     font_size=12,
                     showlegend=False,
                     xaxis=axis,
@@ -172,8 +171,9 @@ class QepGraph:
 
     def createBlank(self):
         fig = go.Figure()
-        
-        axis = dict(showline=False, # hide axis line, grid, ticklabels and  title
+
+        # Hide axis line, grid, ticklabels and title
+        axis = dict(showline=False,
                     zeroline=False,
                     showgrid=False,
                     showticklabels=False,
@@ -182,7 +182,6 @@ class QepGraph:
         fig.update_layout(
                     xaxis=axis,
                     yaxis=axis,
-                    hovermode='closest',
                     plot_bgcolor='rgb(248,248,248)'
                     )
         fig.write_image("images/blank.png")

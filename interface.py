@@ -1,15 +1,16 @@
 import tkinter as tk
-import preprocessing
 
 from PIL import ImageTk, Image
 
 class App(tk.Tk):
-    def __init__(self, pw):
+    def __init__(self, dbms, qepGraph):
         super().__init__()
         
-        self.qepGraph = preprocessing.QepGraph()
-        self.dbms = preprocessing.DBMS(pw)
+        self.dbms = dbms
+        self.qepGraph = qepGraph
+        self.createWindow()
         
+    def createWindow(self):
         topFrame = tk.Frame(self)
         topFrame.pack()
 
@@ -33,7 +34,7 @@ class App(tk.Tk):
         self.queryText.pack()
 
         # Button widget to submit query
-        queryButton = tk.Button(master=queryFrame, text='Submit', command=self.getQuery)
+        queryButton = tk.Button(master=queryFrame, text='Submit', command=self.processQuery)
         queryButton.pack()
 
         ###################################
@@ -68,7 +69,7 @@ class App(tk.Tk):
         self.treeCanvas.create_image(0, 0, anchor=tk.NW, image=self.img)
 
     
-    def getQuery(self):
+    def processQuery(self):
         # Get query
         query = ' '.join((self.queryText.get(1.0, tk.END)).split('\n'))
         result = self.dbms.explainQuery(query)
@@ -83,9 +84,6 @@ class App(tk.Tk):
         self.qepGraph.createQepGraph(result)
         self.img = ImageTk.PhotoImage(Image.open("images/qep.png"))  
         self.treeCanvas.create_image(0, 0, anchor=tk.NW, image=self.img)
-
-    def callback(self):
-        print(self.queryText.get())
 
 class QueryFrame(tk.Frame):
     def __init__(self, container):
