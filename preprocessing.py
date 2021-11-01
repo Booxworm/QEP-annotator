@@ -10,7 +10,7 @@ class DBMS:
         if self.con:
             self.con.close()
 
-    def connect(self, database='TPC-H', user='postgres', password='password', host='127.0.0.1', port='5432'):
+    def connect(self, database='TPC-H', user='postgres', password='Dolphin123:', host='127.0.0.1', port='5432'):
         try:
             self.con = psycopg2.connect(database=database, user=user, password=password, host=host, port=port)
             self.cur = self.con.cursor()
@@ -50,6 +50,8 @@ class DBMS:
     def explainQuery(self, query):
         return self.executeQuery('EXPLAIN (COSTS FALSE, FORMAT JSON) ' + query)[0][0][0]
 
+    def explainQueryString(self, query):
+        return self.executeQuery('EXPLAIN (COSTS FALSE)' + query)
 
 class QepGraph:
     def __init__(self):
