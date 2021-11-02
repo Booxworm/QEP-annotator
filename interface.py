@@ -26,17 +26,29 @@ class App(tk.Tk):
         queryFrame = tk.Frame(master=topFrame)
         queryFrame.pack(side=tk.LEFT)
 
-        # Label widget for query
-        queryLabel = tk.Label(master=queryFrame, text='QUERY')
-        queryLabel.pack()
-
         # Text widget to enter query
         self.queryText = tk.Text(master=queryFrame, width=40, height=10)
         self.queryText.pack()
 
+        # Label widget for query
+        queryLabel = tk.Label(master=queryFrame, text='QUERY')
+        queryLabel.pack()
+
+        #####################
+        # Frame for buttons #
+        #####################
+
+        # Frame widget for buttons
+        buttonFrame = tk.Frame(master=topFrame)
+        buttonFrame.pack(side=tk.LEFT)
+
         # Button widget to submit query
-        queryButton = tk.Button(master=queryFrame, text='Submit', command=self.processQuery)
-        queryButton.pack()
+        submitQueryButton = tk.Button(master=buttonFrame, text='Submit', command=self.processQuery)
+        submitQueryButton.pack()
+
+        # Button widget to clear query
+        clearQueryButton = tk.Button(master=buttonFrame, text='Clear text', command=self.clearQuery)
+        clearQueryButton.pack()
 
         ###################################
         # Frame for displaying annotation #
@@ -86,6 +98,16 @@ class App(tk.Tk):
         # Update tree
         self.qepGraph.createQepGraph(result)
         self.img = ImageTk.PhotoImage(Image.open("images/qep.png"))  
+        self.treeCanvas.create_image(0, 0, anchor=tk.NW, image=self.img)
+    
+    def clearQuery(self):
+        self.queryText.delete(1.0, tk.END)
+
+        self.annotationText.configure(state=tk.NORMAL)
+        self.annotationText.delete(1.0, tk.END)
+        self.annotationText.configure(state=tk.DISABLED)
+        
+        self.img = ImageTk.PhotoImage(Image.open("images/blank.png"))  
         self.treeCanvas.create_image(0, 0, anchor=tk.NW, image=self.img)
 
 # class QueryFrame(tk.Frame):
