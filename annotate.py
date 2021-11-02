@@ -46,6 +46,49 @@ class QEPAnnotator:
                 for eachPlans in temp[0]["Plans"]:
                     qepQueue.append((eachPlans, level))
 
+    #Computing output string from query
+    def computOutputString(self):
+        dbms = preprocessing.DBMS()
+
+        #Connecting to database
+        pw = input('Please enter password for postgres: ')
+        connected = dbms.connect(password=pw)
+        while not connected:
+            pw = input('Please enter password again: ')
+            connected = dbms.connect(password=pw)
+
+        #Get the query input
+        query = dbms.getQuery()
+
+        #Explain the query in the form of JSON format
+        qep = dbms.explainQuery(query)
+
+
+        #Getting queue and instantiating QEP annotator
+        qepQueue = deque()
+        
+        self.qepTraversal(qep["Plan"], qepQueue)
+
+        #Instantiating Parser class
+        parser = Parser()
+        final_output = ""
+        steps = 1
+        hashMap = self.getHashMap()
+        for i in reversed(range(qepAnnotator.getHashMapLength())):
+            length = i+1
+            for j in range(len(hashMap[length])):
+                if hashMap[length][j]["Node Type"] == "Seq Scan":
+                    final_output += "Step " + str(steps) + ": " +  parser.seq_scan_parser(hashMap[length][j]) + "\n"
+                if hashMap[length][j]["Node Type"] == "Hash":
+                    final_output += "Step " + str(steps) + ": " +  parser.hash_parser(hashMap[length][j]) + "\n"
+                if hashMap[length][j]["Node Type"] == "Hash Join":
+                    final_output += "Step " + str(steps) + ": " +  parser.hash_join_parser(hashMap[length][j]) + "\n"
+                steps+= 1
+
+
+        self.setOutputString(final_output)
+
+        return self.getOutputString()
 
 # Traversal is done. Now to parse the JSON
 
@@ -121,57 +164,60 @@ class Parser:
 # Test
 
 if __name__ == "__main__":
-    dbms = preprocessing.DBMS()
 
-    pw = input('Please enter password for postgres: ')
-    connected = dbms.connect(password=pw)
-    while not connected:
-        pw = input('Please enter password again: ')
-        connected = dbms.connect(password=pw)
-
-    #Get the query input
-    query = dbms.getQuery()
-
-    #Explain the query in the form of JSON format
-    qep = dbms.explainQuery(query)
-    print("This is the qep")
-    print(qep)
-
-
-    #Creating queue and result to return order
-    qepQueue = deque()
     qepAnnotator = QEPAnnotator()
 
-    qepAnnotator.qepTraversal(qep["Plan"], qepQueue)
-    print(qepAnnotator.getQepRes())
-    print("This is the hashMap")
+    print(qepAnnotator.computOutputString())
+    # dbms = preprocessing.DBMS()
 
-    print(qepAnnotator.getHashMap())
-    print("###########################")
+    # pw = input('Please enter password for postgres: ')
+    # connected = dbms.connect(password=pw)
+    # while not connected:
+    #     pw = input('Please enter password again: ')
+    #     connected = dbms.connect(password=pw)
 
-    #Testing Parser
+    # #Get the query input
+    # query = dbms.getQuery()
 
-    parser = Parser()
-    final_output = ""
-    steps = 1
-    hashMap = qepAnnotator.getHashMap()
-    for i in reversed(range(qepAnnotator.getHashMapLength())):
-        length = i+1
-        for j in range(len(hashMap[length])):
-            if hashMap[length][j]["Node Type"] == "Seq Scan":
-                final_output += "Step " + str(steps) + ": " +  parser.seq_scan_parser(hashMap[length][j]) + "\n"
-            if hashMap[length][j]["Node Type"] == "Hash":
-                final_output += "Step " + str(steps) + ": " +  parser.hash_parser(hashMap[length][j]) + "\n"
-            if hashMap[length][j]["Node Type"] == "Hash Join":
-                final_output += "Step " + str(steps) + ": " +  parser.hash_join_parser(hashMap[length][j]) + "\n"
-            steps+= 1
+    # #Explain the query in the form of JSON format
+    # qep = dbms.explainQuery(query)
+    # print("This is the qep")
+    # print(qep)
 
 
-    #Set output string for qep Annotator
+    # #Creating queue and result to return order
+    # qepQueue = deque()
+    # qepAnnotator = QEPAnnotator()
 
-    qepAnnotator.setOutputString(final_output)
+    # qepAnnotator.qepTraversal(qep["Plan"], qepQueue)
+    # print(qepAnnotator.getQepRes())
+    # print("This is the hashMap")
 
-    print(qepAnnotator.getOutputString())
+    # print(qepAnnotator.getHashMap())
+
+    # #Testing Parser
+
+    # parser = Parser()
+    # final_output = ""
+    # steps = 1
+    # hashMap = qepAnnotator.getHashMap()
+    # for i in reversed(range(qepAnnotator.getHashMapLength())):
+    #     length = i+1
+    #     for j in range(len(hashMap[length])):
+    #         if hashMap[length][j]["Node Type"] == "Seq Scan":
+    #             final_output += "Step " + str(steps) + ": " +  parser.seq_scan_parser(hashMap[length][j]) + "\n"
+    #         if hashMap[length][j]["Node Type"] == "Hash":
+    #             final_output += "Step " + str(steps) + ": " +  parser.hash_parser(hashMap[length][j]) + "\n"
+    #         if hashMap[length][j]["Node Type"] == "Hash Join":
+    #             final_output += "Step " + str(steps) + ": " +  parser.hash_join_parser(hashMap[length][j]) + "\n"
+    #         steps+= 1
+
+
+    # #Set output string for qep Annotator
+
+    # qepAnnotator.setOutputString(final_output)
+
+    # print(qepAnnotator.getOutputString())
 
 '''
 select *
