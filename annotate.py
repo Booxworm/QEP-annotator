@@ -1,6 +1,5 @@
 from typing import final
 import preprocessing
-import json
 from collections import defaultdict, deque
 
 class QEPAnnotator:
@@ -107,12 +106,14 @@ class Parser:
     '''
     Hash Parser
     '''
-
     def hash_parser(self, qep):
         outputString = "This node will perform utilization of hash memory with rows from the relation " + qep["Plans"][0]["Relation Name"] + ". "
 
         return outputString
 
+    '''
+
+    '''
 
     
 
@@ -159,13 +160,10 @@ if __name__ == "__main__":
         for j in range(len(hashMap[length])):
             if hashMap[length][j]["Node Type"] == "Seq Scan":
                 final_output += "Step " + str(steps) + ": " +  parser.seq_scan_parser(hashMap[length][j]) + "\n"
-                print(final_output)
             if hashMap[length][j]["Node Type"] == "Hash":
                 final_output += "Step " + str(steps) + ": " +  parser.hash_parser(hashMap[length][j]) + "\n"
-                print(final_output)
             if hashMap[length][j]["Node Type"] == "Hash Join":
                 final_output += "Step " + str(steps) + ": " +  parser.hash_join_parser(hashMap[length][j]) + "\n"
-                print(final_output)
             steps+= 1
 
 
@@ -173,7 +171,7 @@ if __name__ == "__main__":
 
     qepAnnotator.setOutputString(final_output)
 
-    print(qepAnnotator.getOutputString)
+    print(qepAnnotator.getOutputString())
 
 '''
 select *
