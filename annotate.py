@@ -47,23 +47,7 @@ class QEPAnnotator:
                     qepQueue.append((eachPlans, level))
 
     #Computing output string from query
-    def computOutputString(self):
-        dbms = preprocessing.DBMS()
-
-        #Connecting to database
-        pw = input('Please enter password for postgres: ')
-        connected = dbms.connect(password=pw)
-        while not connected:
-            pw = input('Please enter password again: ')
-            connected = dbms.connect(password=pw)
-
-        #Get the query input
-        query = dbms.getQuery()
-
-        #Explain the query in the form of JSON format
-        qep = dbms.explainQuery(query)
-
-
+    def computeOutputString(self, qep):
         #Getting queue and instantiating QEP annotator
         qepQueue = deque()
         
@@ -74,7 +58,7 @@ class QEPAnnotator:
         final_output = ""
         steps = 1
         hashMap = self.getHashMap()
-        for i in reversed(range(qepAnnotator.getHashMapLength())):
+        for i in reversed(range(self.getHashMapLength())):
             length = i+1
             for j in range(len(hashMap[length])):
                 if hashMap[length][j]["Node Type"] == "Seq Scan":
@@ -164,10 +148,24 @@ class Parser:
 # Test
 
 if __name__ == "__main__":
+    dbms = preprocessing.DBMS()
+
+    #Connecting to database
+    pw = input('Please enter password for postgres: ')
+    connected = dbms.connect(password=pw)
+    while not connected:
+        pw = input('Please enter password again: ')
+        connected = dbms.connect(password=pw)
+
+    #Get the query input
+    query = dbms.getQuery()
+
+    #Explain the query in the form of JSON format
+    qep = dbms.explainQuery(query)
 
     qepAnnotator = QEPAnnotator()
 
-    print(qepAnnotator.computOutputString())
+    print(qepAnnotator.computeOutputString(qep))
     # dbms = preprocessing.DBMS()
 
     # pw = input('Please enter password for postgres: ')

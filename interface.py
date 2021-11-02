@@ -3,10 +3,11 @@ import tkinter as tk
 from PIL import ImageTk, Image
 
 class App(tk.Tk):
-    def __init__(self, dbms, qepGraph):
+    def __init__(self, dbms, qepAnnotator, qepGraph):
         super().__init__()
         
         self.dbms = dbms
+        self.qepAnnotator = qepAnnotator
         self.qepGraph = qepGraph
         self.createWindow()
         
@@ -75,9 +76,11 @@ class App(tk.Tk):
         result = self.dbms.explainQuery(query)
 
         # Update annotation
+        annotation = self.qepAnnotator.computeOutputString(result)
+
         self.annotationText.configure(state=tk.NORMAL)
         self.annotationText.delete(1.0, tk.END)
-        self.annotationText.insert(tk.END, result)
+        self.annotationText.insert(tk.END, annotation)
         self.annotationText.configure(state=tk.DISABLED)
 
         # Update tree
@@ -85,46 +88,46 @@ class App(tk.Tk):
         self.img = ImageTk.PhotoImage(Image.open("images/qep.png"))  
         self.treeCanvas.create_image(0, 0, anchor=tk.NW, image=self.img)
 
-class QueryFrame(tk.Frame):
-    def __init__(self, container):
-        super().__init__(container)
+# class QueryFrame(tk.Frame):
+#     def __init__(self, container):
+#         super().__init__(container)
 
-        # Label widget for query
-        self.label = tk.Label(self, text='QUERY')
-        self.label.pack()
+#         # Label widget for query
+#         self.label = tk.Label(self, text='QUERY')
+#         self.label.pack()
 
-        # Text widget to enter query
-        self.text = tk.Text(self, height=10, width=30)
-        self.text.pack()
+#         # Text widget to enter query
+#         self.text = tk.Text(self, height=10, width=30)
+#         self.text.pack()
 
-        # Button widget to submit query
-        self.button = tk.Button(self, text='Submit')
-        self.button.pack()
+#         # Button widget to submit query
+#         self.button = tk.Button(self, text='Submit')
+#         self.button.pack()
 
-class AnnotationFrame(tk.Frame):
-    def __init__(self, container):
-        super().__init__(container)
+# class AnnotationFrame(tk.Frame):
+#     def __init__(self, container):
+#         super().__init__(container)
 
-        # Label widget for annotation
-        label = tk.Label(self, text='ANNOTATION')
-        label.pack()
+#         # Label widget for annotation
+#         label = tk.Label(self, text='ANNOTATION')
+#         label.pack()
 
-        # Text widget to enter query
-        text = tk.Text(self, state='disabled', height=10, width=30)
-        text.pack()
+#         # Text widget to enter query
+#         text = tk.Text(self, state='disabled', height=10, width=30)
+#         text.pack()
 
-class TreeFrame(tk.Frame):
-    def __init__(self, container):
-        super().__init__(container)
+# class TreeFrame(tk.Frame):
+#     def __init__(self, container):
+#         super().__init__(container)
 
-        # Label widget for tree
-        label = tk.Label(self, text='TREE')
-        label.pack()
+#         # Label widget for tree
+#         label = tk.Label(self, text='TREE')
+#         label.pack()
 
-        # Canvas widget for image
-        canvas = tk.Canvas(self, width=700, height=500)  
-        canvas.pack()
+#         # Canvas widget for image
+#         canvas = tk.Canvas(self, width=700, height=500)  
+#         canvas.pack()
 
-        # Image of QEP tree
-        self.img = ImageTk.PhotoImage(Image.open('images/blank.png'))  
-        canvas.create_image(0, 0, anchor=tk.NW, image=self.img)
+#         # Image of QEP tree
+#         self.img = ImageTk.PhotoImage(Image.open('images/blank.png'))  
+#         canvas.create_image(0, 0, anchor=tk.NW, image=self.img)

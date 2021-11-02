@@ -1,7 +1,9 @@
 from psycopg2 import connect
+import annotate
 import interface
 import preprocessing
 
+qepAnnotator = annotate.QEPAnnotator()
 qepGraph = preprocessing.QepGraph()
 dbms = preprocessing.DBMS()
 
@@ -11,7 +13,7 @@ while not connected:
     pw = input('Please enter password again: ')
     connected = dbms.connect(password=pw)
 
-app = interface.App(dbms, qepGraph)
+app = interface.App(dbms, qepAnnotator, qepGraph)
 app.mainloop()
 
 # import preprocessing
