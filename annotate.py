@@ -47,6 +47,7 @@ class QEPAnnotator:
                     qepQueue.append((eachPlans, level))
 
     #Computing output string from query
+
     def computeOutputString(self, qep):
         #Getting queue and instantiating QEP annotator
         qepQueue = deque()
@@ -129,7 +130,6 @@ class Parser:
         
         return outputString
 
-
     '''
     Hash Parser
     '''
@@ -138,84 +138,283 @@ class Parser:
 
         return outputString
 
-    '''
 
     '''
+    Aggregate Parser
+    '''
+    def aggregate_parser(self, qep):
+        outputString = ""
 
+        if qep["Strategy"]  == "Sorted":
+            outputString = "This node performs an aggregate based on sorting. "
+            if "Group Key" in qep:
+                tempString = "The result is grouped by "
+                for groupKey in qep["Group Key"]:
+                    tempString += groupKey + ", "
+            
+                tempString = tempString[:-2] + ". "
+
+            outputString += tempString
+
+            if "Filter" in qep:
+                outputString += "It will be bounded by the condition " + qep["Filter"] + ". "
+            
+            return outputString
+
+
+        if qep["Strategy"] == "Hashed":
+            outputString = "This node performs an aggregate based on hashing. "
+            
+            if len(qep["Group Key"]) == 1:
+                tempString = "It will hash all the rows based on the key "
+                tempString += qep["Group Key"][0] + ". "
+                
+                outputString += tempString
+
+            else:
+                tempString = "It hashes all the rows based on the keys "
+                for key in qep["Group Key"]:
+                    tempString += key + ", "
+                
+                tempString += "and finally returns the desired row after manipulation. "
+            
+                outputString += tempString
+
+                return outputString
+        
+        if qep["Strategy"] == "Plain":
+            outputString = "The result will be aggregated based on a plain function. "
+
+            return outputString
+
+    '''
+    CTE Scan Parser
+    '''
+
+    def cte_scan_parser(self, qep):
+        outputString = "This node will perform a CTE scan through the table "
+
+        outputString += str(qep["CTE Name"]) + " which will be stored in memory."
+
+        if "Index Cond" in qep:
+            outputString += "This scan will be applied with the condition(s) "+ qep["Index Cond"] + ". "
+
+        if "Filter" in qep:
+            outputString += "The results will finally be filtered by " + qep["Filter"] + ". "
+        
+        return outputString
+
+
+    '''
+    Function Scan Parser
+    '''
+
+    def function_scan_parser(self, qep):
+        outputString = "This node will perform a function scan by running the function " + qep["Function Name"] + " and returns the records that were created by it. "
+        return outputString
+
+
+    '''
+    Generic Parser
+    '''
+
+    def generic_parser(self, qep):
+        outputString = "The node type here is " + qep["Node Type"] + ". "
+        outputString = "This node will perform a function with its children nodes. "
+        tempString = ""
+        if "Plans" in qep:
+            tempString = "It will make use of its children nodes "
+            for child in qep["Plans"]:
+                tempString += child["Node Type"]
+
+        if len(tempString) <1:
+            return outputString
+        else:
+            outputString += tempString + ". "
+
+
+    '''
+    Group Parser
+    '''
+
+    def group_parser(self, qep):
+        outputString = "This node will perform a grouping based on "
+        tempString = ""
+        if len(qep["Group Key"]) == 1:
+            tempString = "the  key" + qep["Group Key"][0] + "."
+        
+        else:
+            tempString = "the keys "
+            for key in qep["Group Key"][:-1]:
+                tempString += key + ", "
+            
+            tempString = tempString[:-2] + "."
+
+        outputString += tempString
+
+        return outputString
+
+
+    '''
+    Index Scan Parser
+    '''
+
+    def index_scan_parser(self, qep):
+        outputString = "This node performs an index scan. "
+        
+        tempString = "It performs the index scan by using an index table " + qep["Index Name"] + ". "
+        if "Index Cond" in qep:
+            tempString += "The scan will be applied with the condition " + qep["Index Cond"] + ". "
+    
+        tempString += "It opens up the relation " + qep["Relation Name"] + "and fetches rows pointed to the index matched in the scan. "
+    
+        if "Filter" in qep:
+            tempString += "The result of this scan will then be filtered by " + qep["Filter"] + ". "
+        
+        outputString += tempString
+
+        return outputString
+
+    
+    '''
+    Index Only Scan Parser
+    '''
+    def index_only_scan_parser(self, qep):
+        outputString = "This node performs an index only scan. "
+        tempString = ""
+        if "Index Cond" in qep:
+            tempString += "The scan will be applied with the condition " + qep["Index Cond"] + ". "
+        
+        outputString += tempString + "It will then return the matches found in index table as the result"
+
+        if "Filter" in qep:
+            outputString += "The result will then be filtered by " + qep["Filter"] + ". "
+
+        return outputString
+
+
+
+    '''
+    Limit Parser
+    '''
+    def limit_parser(self, qep):
+        outputString = "This node will perform a limit scan on the relation " + qep['Relation Name'] + ". "
+        outputString += "However, instead of scanning the entire table, it only does so with a limit of " + str(qep["Plan Rows"]) + "entries. "
+
+        return outputString
+
+
+
+    '''
+    Materialize Parser (think again)
+    '''
+    def materialize_parser(self, qep):
+        outputString = "This node is performs materialization. This will "
+
+    '''
+    Merge Join Parser
+    '''
+    def merge_join_parser(self, qep):
+
+        outputString = "This node will perform a merge join."
+        
+
+        if "Plans" in qep:
+            tempString = "The children of this nodes that will be considered in merge join are the relation"
+            for child in qep["Plans"]:
+                if "Relation Name" in child:
+                    tempString += child["Relation Name"] + ", "
+            
+            tempString = tempString[:-2]
+
+            outputString += tempString
+
+        if "Merge Cond" in qep:
+            outputString +=  "The result will be bounded by the condition " + qep["Merge Cond"] + ". "
+        
+        if "Join Type" == 'Semi':
+            outputString += "However, when projecting results, only the rows fro mthe left relation are returned"
+        
+        return outputString
     
 
 
+    '''
+    Nested Loop Parser
+    '''
+
+    def nested_loop_parser(self, qep):
+        outputString = "This node performs a nested loop scan on the relations "
+
+        planOne = qep["Plans"][0]
+        planTwo =  qep["Plans"][1]
+
+        outputString += planOne["Relation Name"] + "and "
+
+        outputString += planTwo["Relation Name"] + ". "
+
+        outputString += "The join result between both scan results are then returned as new rows."
+
+        return outputString
+
+
+    '''
+    SetOp Parser
+    '''
+
+    def setOp_parser(self, qep):
+        return 
+
+    '''
+    Sort Parser 
+    ''' 
+
+    def sort_parser(self, qep):
+        
+        outputString = "This node performs sorting by using attribute "
+        if "DESC" in qep["Sort Key"]:
+            outputString += qep["Sort Key"] + "in descending order."
+        elif "INC" in qep["Sort Key"]:
+            outputString += qep["Sort Key"] + "in ascending order."
+        else:
+            outputString += qep["Sort Key"] + "."
+
+        return outputString
+
+    '''
+    Subquery Scan Parser
+    '''
+
+    def subquery_scan_parser(self, qep):
+        outputString = "This node performs a subquery scan of relation " + qep["Plans"][0]["Relation Name"] + ". "
+
+        return outputString
+
+
+    '''
+    Unique Parser
+    '''
+    def unique_parser(self, qep):
+        outputString = "This node will extract the unique values from the table based on attribute" + qep["Plans"][0]["Sort Key"] + ". "
+        return outputString
+
+
+    '''
+    Values Scan Parser
+    '''
+
+    def values_scan_parser(self, qep):
+        outputString = "This node will scan through the given values from the query "
+
+        return outputString
 # Test
 
 if __name__ == "__main__":
-    dbms = preprocessing.DBMS()
-
-    #Connecting to database
-    pw = input('Please enter password for postgres: ')
-    connected = dbms.connect(password=pw)
-    while not connected:
-        pw = input('Please enter password again: ')
-        connected = dbms.connect(password=pw)
-
-    #Get the query input
-    query = dbms.getQuery()
-
-    #Explain the query in the form of JSON format
-    qep = dbms.explainQuery(query)
 
     qepAnnotator = QEPAnnotator()
 
-    print(qepAnnotator.computeOutputString(qep))
-    # dbms = preprocessing.DBMS()
-
-    # pw = input('Please enter password for postgres: ')
-    # connected = dbms.connect(password=pw)
-    # while not connected:
-    #     pw = input('Please enter password again: ')
-    #     connected = dbms.connect(password=pw)
-
-    # #Get the query input
-    # query = dbms.getQuery()
-
-    # #Explain the query in the form of JSON format
-    # qep = dbms.explainQuery(query)
-    # print("This is the qep")
-    # print(qep)
-
-
-    # #Creating queue and result to return order
-    # qepQueue = deque()
-    # qepAnnotator = QEPAnnotator()
-
-    # qepAnnotator.qepTraversal(qep["Plan"], qepQueue)
-    # print(qepAnnotator.getQepRes())
-    # print("This is the hashMap")
-
-    # print(qepAnnotator.getHashMap())
-
-    # #Testing Parser
-
-    # parser = Parser()
-    # final_output = ""
-    # steps = 1
-    # hashMap = qepAnnotator.getHashMap()
-    # for i in reversed(range(qepAnnotator.getHashMapLength())):
-    #     length = i+1
-    #     for j in range(len(hashMap[length])):
-    #         if hashMap[length][j]["Node Type"] == "Seq Scan":
-    #             final_output += "Step " + str(steps) + ": " +  parser.seq_scan_parser(hashMap[length][j]) + "\n"
-    #         if hashMap[length][j]["Node Type"] == "Hash":
-    #             final_output += "Step " + str(steps) + ": " +  parser.hash_parser(hashMap[length][j]) + "\n"
-    #         if hashMap[length][j]["Node Type"] == "Hash Join":
-    #             final_output += "Step " + str(steps) + ": " +  parser.hash_join_parser(hashMap[length][j]) + "\n"
-    #         steps+= 1
-
-
-    # #Set output string for qep Annotator
-
-    # qepAnnotator.setOutputString(final_output)
-
-    # print(qepAnnotator.getOutputString())
+    print(qepAnnotator.computeOutputString())
+    
 
 '''
 select *
