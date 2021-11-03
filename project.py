@@ -3,17 +3,17 @@ import annotate
 import interface
 import preprocessing
 
-qepAnnotator = annotate.QEPAnnotator()
-qepGraph = preprocessing.QepGraph()
-dbms = preprocessing.DBMS()
+# qepAnnotator = annotate.QEPAnnotator()
+# qepGraph = preprocessing.QepGraph()
+# dbms = preprocessing.DBMS()
 
-pw = input('Please enter password for postgres: ')
-connected = dbms.connect(password=pw)
-while not connected:
-    pw = input('Please enter password again: ')
-    connected = dbms.connect(password=pw)
+# pw = input('Please enter password for postgres: ')
+# connected = dbms.connect(password=pw)
+# while not connected:
+#     pw = input('Please enter password again: ')
+#     connected = dbms.connect(password=pw)
 
-app = interface.App(dbms, qepAnnotator, qepGraph)
+app = interface.App()
 app.mainloop()
 
 # import preprocessing
