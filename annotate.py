@@ -64,10 +64,40 @@ class QEPAnnotator:
             for j in range(len(hashMap[length])):
                 if hashMap[length][j]["Node Type"] == "Seq Scan":
                     final_output += "Step " + str(steps) + ": " +  parser.seq_scan_parser(hashMap[length][j]) + "\n"
-                if hashMap[length][j]["Node Type"] == "Hash":
+                elif hashMap[length][j]["Node Type"] == "Hash":
                     final_output += "Step " + str(steps) + ": " +  parser.hash_parser(hashMap[length][j]) + "\n"
-                if hashMap[length][j]["Node Type"] == "Hash Join":
+                elif hashMap[length][j]["Node Type"] == "Hash Join":
                     final_output += "Step " + str(steps) + ": " +  parser.hash_join_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Aggregate":
+                    final_output += "Step " + str(steps) + ": " +  parser.aggregate_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "CTE Scan":
+                    final_output += "Step " + str(steps) + ": " +  parser.cte_scan_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Function Scan":
+                    final_output += "Step " + str(steps) + ": " +  parser.function_scan_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Unrecognize":
+                    final_output += "Step " + str(steps) + ": " +  parser.generic_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Group":
+                    final_output += "Step " + str(steps) + ": " +  parser.group_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Index Scan":
+                    final_output += "Step " + str(steps) + ": " +  parser.index_scan_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Index Only Scan":
+                    final_output += "Step " + str(steps) + ": " +  parser.index_only_scan_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Limit":
+                    final_output += "Step " + str(steps) + ": " +  parser.limit_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Materialize":
+                    final_output += "Step " + str(steps) + ": " +  parser.materialize_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Merge Join":
+                    final_output += "Step " + str(steps) + ": " +  parser.merge_join_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Nested Loop":
+                    final_output += "Step " + str(steps) + ": " +  parser.nested_loop_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Sort":
+                    final_output += "Step " + str(steps) + ": " +  parser.sort_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Subquery Scan":
+                    final_output += "Step " + str(steps) + ": " +  parser.subquery_scan_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Unique":
+                    final_output += "Step " + str(steps) + ": " +  parser.unique_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Values Scan":
+                    final_output += "Step " + str(steps) + ": " +  parser.values_scan_parser(hashMap[length][j]) + "\n"
                 steps+= 1
 
 
