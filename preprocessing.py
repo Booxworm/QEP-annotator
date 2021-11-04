@@ -6,6 +6,10 @@ from collections import deque
 from igraph import Graph
 
 class DBMS:
+    def __init__(self):
+        self.con = None
+        self.schema = {}
+
     def __del__(self):
         if self.con:
             self.con.close()
@@ -21,37 +25,34 @@ class DBMS:
             print('Failed to connect to database')
             return False
 
-    def getQuery(self):
-        query = []
-        print('Enter your query: ')
-        
-        # Use default query if left blank
-        tmp = input()
-        if tmp == '':
-            return 'SELECT * FROM customer, orders WHERE c_custkey = o_custkey;'
-        
-        query.append(tmp)
-        while tmp[-1] != ';':
-            tmp = input()
-            query.append(tmp)
-
-        joined = ' '.join(query)
-        return joined
-
     def executeQuery(self, query):
-        print(query)
         try:
             self.cur.execute(query)
             self.con.commit()
-        except:
+            return self.cur.fetchall()
+        except Exception as e:
             self.con.rollback()
-        return self.cur.fetchall()
+            raise e
 
     def explainQuery(self, query):
         return self.executeQuery('EXPLAIN (COSTS FALSE, FORMAT JSON) ' + query)[0][0][0]
 
-    def explainQueryString(self, query):
-        return self.executeQuery('EXPLAIN (COSTS FALSE)' + query)
+    def getTables(self):
+        results = self.executeQuery("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")
+        formattedResults = [r[0] for r in results]
+        return formattedResults
+    
+    def getColumns(self, table):
+
+        # Query has already been processed before, fetch from cache
+        if table in self.schema:
+            return self.schema[table]
+
+        # Execute query and save to cache
+        results = self.executeQuery("SELECT column_name FROM information_schema.columns WHERE table_name = '{}';".format(table))
+        formattedResults = [r[0] for r in results]
+        self.schema[table] = formattedResults
+        return formattedResults
 
 class QepGraph:
     def __init__(self):

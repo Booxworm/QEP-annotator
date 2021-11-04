@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter.constants import E
 import preprocessing
 import annotate
 from functools import partial
@@ -17,7 +18,6 @@ class App(tk.Tk):
         self['background'] = '#62c2da'
 
         self.loginWindow()
-        # self.goToSchema()
 
     def loginWindow(self):
 
@@ -95,20 +95,6 @@ class App(tk.Tk):
         self.errorMsg.config(font=('Helvetica bold', 14, "bold"))
         self.errorMsg['background'] = '#62c2da'
         self.errorMsg.grid_forget()
-
-    def validateLogin(self, database, user, password, host, port):
-        connected = self.dbms.connect(
-            database=database.get(),
-            user=user.get(),
-            password=password.get(),
-            host=host.get(), 
-            port=port.get()
-        )
-
-        if connected:
-            self.goToMain()
-        else:
-            self.errorMsg.grid()
 
     def mainWindow(self):
         topFrame = tk.Frame(self)
@@ -234,44 +220,6 @@ class App(tk.Tk):
         invisibleLabel = tk.Label(master=invisibleFrame, text='', foreground = 'white', height = 2, width = 20)
         invisibleLabel.pack(padx=30)
         invisibleLabel['background'] = '#62c2da'
-
-    def processQuery(self):
-        # Get query
-        query = ' '.join((self.queryText.get(1.0, tk.END)).split('\n'))
-        result = self.dbms.explainQuery(query)
-
-        # Update annotation
-        annotation = self.qepAnnotator.computeOutputString(result)
-
-        self.annotationText.configure(state=tk.NORMAL)
-        self.annotationText.delete(1.0, tk.END)
-        self.annotationText.insert(tk.END, annotation)
-        self.annotationText.configure(state=tk.DISABLED)
-
-        # Update tree
-        self.qepGraph.createQepGraph(result)
-        self.img = ImageTk.PhotoImage(Image.open("images/qep.png"))  
-        self.treeCanvas.create_image(0, 0, anchor=tk.NW, image=self.img)
-    
-    def clearQuery(self):
-        self.queryText.delete(1.0, tk.END)
-
-        self.annotationText.configure(state=tk.NORMAL)
-        self.annotationText.delete(1.0, tk.END)
-        self.annotationText.configure(state=tk.DISABLED)
-        
-        self.img = ImageTk.PhotoImage(Image.open("images/blank.png"))  
-        self.treeCanvas.create_image(0, 0, anchor=tk.NW, image=self.img)
-
-    def goToMain(self):
-        for widgets in self.winfo_children():
-            widgets.destroy()
-        self.mainWindow()
-
-    def goToSchema(self):
-        for widgets in self.winfo_children():
-            widgets.destroy()
-        self.schemaWindow()
     
     def schemaWindow(self):
 
@@ -298,7 +246,6 @@ class App(tk.Tk):
         bottomFrame.pack(side=tk.LEFT, anchor=tk.W)
         bottomFrame['background'] = '#62c2da'
 
-
         #############################
         # Frame for database schema #
         #############################
@@ -307,38 +254,26 @@ class App(tk.Tk):
         schemaFrame['background'] = '#62c2da'
         schemaFrame.pack()
 
-        schema = '''
-        region
-        nation
-        supplier
-        part
-        partsupp
-        customer
-        orders
-        lineitem
-            l_commitdate
-            l_receiptdate
-            l_linenumber
-            l_quantity
-            l_orderkey
-            l_extendedprice
-            l_discount
-            l_tax
-            l_partkey
-            l_suppkey
-            l_shipdate
-            l_comment
-            l_returnflag
-            l_linestatus
-            l_shipinstruct
-            l_shipmode
-        '''
-        schemaMsg = tk.Text(schemaFrame, height=28, borderwidth=4, relief="solid")
-        schemaMsg.insert(tk.END, schema)
-        schemaMsg.configure(state=tk.DISABLED)
-        schemaMsg.pack()
-        schemaMsg['background'] = '#62c2da'
-        schemaMsg.config(font=('Helvetica bold', 14, "bold"))
+        tables = self.dbms.getTables()
+
+        tableFrame = tk.Frame(schemaFrame)
+        tableFrame.grid(row=0, column=0)
+        tableFrame['background'] = '#62c2da'
+        
+        columnFrame = tk.Frame(schemaFrame, highlightthickness=1, highlightcolor='black')
+        columnFrame.grid(row=0, column=1, padx=10)
+
+        columnText = tk.Text(columnFrame, state=tk.DISABLED, width=50, height=28, borderwidth=4, relief="solid")
+        columnText.pack()
+        columnText['background'] = '#62c2da'
+        columnText.config(font=('Helvetica bold', 14, "bold"))
+
+        for i in range(len(tables)):
+            buttonFunc = partial(self.displaySchema, columnText, tables[i])
+            button = tk.Button(tableFrame, text=tables[i], command=buttonFunc, foreground = 'white', height = 2, width = 20)
+            button.grid(row=i, column=0, pady=5)
+            button['background'] = '#063970'
+            button.config(font=('Helvetica bold', 14, "bold"))
 
         ####################
         # Frame for button #
@@ -353,85 +288,74 @@ class App(tk.Tk):
         schemaButton['background'] = '#063970'
         schemaButton.config(font=('Calibri', 14, "bold"))
 
-'''
-SELECT table_name
-FROM information_schema.tables
-WHERE table_schema = 'public';
+    def validateLogin(self, database, user, password, host, port):
+        connected = self.dbms.connect(
+            database=database.get(),
+            user=user.get(),
+            password=password.get(),
+            host=host.get(), 
+            port=port.get()
+        )
 
-SELECT column_name
-FROM information_schema.columns
-WHERE table_name = '';
+        if connected:
+            self.goToMain()
+        else:
+            self.errorMsg.grid()
 
-'''
+    def processQuery(self):
+        # Get query
+        error =  None
+        try:
+            query = ' '.join((self.queryText.get(1.0, tk.END)).split('\n'))
+            result = self.dbms.explainQuery(query)
+        except Exception as e:
+            error = e
+            print(e)
 
-'''
-        region
-            r_regionkey
-            r_name
-            r_comment
-        nation
-            n_nationkey
-            n_regionkey
-            n_name
-            n_comment
-        supplier
-            s_nationkey
-            s_suppkey
-            s_acctbal
-            s_comment
-            s_phone
-            s_name
-            s_address
-        part
-            p_size
-            p_retailprice
-            p_partkey
-            p_brand
-            p_type
-            p_container
-            p_comment
-            p_name
-            p_mfgr
-        partsupp
-            ps_partkey
-            ps_suppkey
-            ps_availqty
-            ps_supplycost
-            ps_comment
-        customer
-            c_acctbal
-            c_nationkey
-            c_custkey
-            c_phone
-            c_mktsegment
-            c_comment
-            c_name
-            c_address
-        orders
-            o_orderkey
-            o_custkey
-            o_totalprice
-            o_orderdate
-            o_shippriority
-            o_orderpriority
-            o_orderstatus
-            o_clerk
-            o_comment
-        lineitem
-            l_commitdate
-            l_receiptdate
-            l_linenumber
-            l_quantity
-            l_orderkey
-            l_extendedprice
-            l_discount
-            l_tax
-            l_partkey
-            l_suppkey
-            l_shipdate
-            l_comment
-            l_returnflag
-            l_linestatus
-            l_shipinstruct
-            l_shipmode
-        '''
+        if error:
+            self.annotationText.configure(state=tk.NORMAL, fg='red')
+            self.annotationText.delete(1.0, tk.END)
+            self.annotationText.insert(tk.END, error)
+            self.annotationText.configure(state=tk.DISABLED)
+        else:
+            # Update annotation
+            annotation = self.qepAnnotator.computeOutputString(result)
+
+            self.annotationText.configure(state=tk.NORMAL, fg='black')
+            self.annotationText.delete(1.0, tk.END)
+            self.annotationText.insert(tk.END, annotation)
+            self.annotationText.configure(state=tk.DISABLED)
+
+            # Update tree
+            self.qepGraph.createQepGraph(result)
+            self.img = ImageTk.PhotoImage(Image.open("images/qep.png"))  
+            self.treeCanvas.create_image(0, 0, anchor=tk.NW, image=self.img)
+
+    def clearQuery(self):
+        self.queryText.delete(1.0, tk.END)
+
+        self.annotationText.configure(state=tk.NORMAL)
+        self.annotationText.delete(1.0, tk.END)
+        self.annotationText.configure(state=tk.DISABLED)
+        
+        self.img = ImageTk.PhotoImage(Image.open("images/blank.png"))  
+        self.treeCanvas.create_image(0, 0, anchor=tk.NW, image=self.img)
+
+    def goToMain(self):
+        for widgets in self.winfo_children():
+            widgets.destroy()
+        self.mainWindow()
+
+    def goToSchema(self):
+        for widgets in self.winfo_children():
+            widgets.destroy()
+        self.schemaWindow()
+    
+    def displaySchema(self, textWidget, table):
+        columns = self.dbms.getColumns(table)
+        stringColumns = '\n'.join(columns)
+
+        textWidget.configure(state=tk.NORMAL)
+        textWidget.delete(1.0, tk.END)
+        textWidget.insert(tk.END, stringColumns)
+        textWidget.configure(state=tk.DISABLED)
