@@ -319,6 +319,7 @@ class App(tk.Tk):
             self.annotationText.configure(state=tk.DISABLED)
         else:
             # Update annotation
+            self.qepAnnotator = annotate.QEPAnnotator()
             annotation = self.qepAnnotator.computeOutputString(result)
 
             self.annotationText.configure(state=tk.NORMAL, fg='black')

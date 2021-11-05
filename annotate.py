@@ -7,13 +7,6 @@ class QEPAnnotator:
     def __init__(self):
         self.qepHashMap = {}
         self.qepRes = []
-        self.outputString = ""
-
-    def getOutputString(self):
-        return self.outputString
-    
-    def setOutputString(self, _string):
-        self.outputString = _string
     
     def getHashMap(self):
         return self.qepHashMap
@@ -98,12 +91,13 @@ class QEPAnnotator:
                     final_output += "Step " + str(steps) + ": " +  parser.unique_parser(hashMap[length][j]) + "\n"
                 elif hashMap[length][j]["Node Type"] == "Values Scan":
                     final_output += "Step " + str(steps) + ": " +  parser.values_scan_parser(hashMap[length][j]) + "\n"
+                else:
+                    final_output += "Step " + str(steps) + ": " + "The output will be based on its node type " + str(hashMap[length][j]["Node Type"]) + "." + "\n"
                 steps+= 1
 
+        
 
-        self.setOutputString(final_output)
-
-        return self.getOutputString()
+        return final_output
 
 # Traversal is done. Now to parse the JSON
 
@@ -213,7 +207,8 @@ class Parser:
                 return outputString
         
         if qep["Strategy"] == "Plain":
-            outputString = "The result will be aggregated based on a plain function. "
+            outputString = "The result will be aggregated based on a " + qep["Node Type"] + " function. "
+
 
             return outputString
 
@@ -442,7 +437,6 @@ class Parser:
 if __name__ == "__main__":
 
     qepAnnotator = QEPAnnotator()
-
     print(qepAnnotator.computeOutputString())
     
 
@@ -452,4 +446,10 @@ from customer C,
 orders O
 where C.c_custkey =
 O.o_custkey;
+
+
+
+max
+select max(p_retailprice)
+from part
 '''
