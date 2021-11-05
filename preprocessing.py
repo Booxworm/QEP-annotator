@@ -131,7 +131,7 @@ class QepGraph:
                         marker=dict(symbol='square',
                                         size=50,
                                         color='#6175c1',    #'#DB4551',
-                                        line=dict(color='rgb(50,50,50)', width=2)
+                                        line=dict(color='rgb(50,50,50)', width=1)
                                         ),
                         text=labels,
                         hoverinfo='text',

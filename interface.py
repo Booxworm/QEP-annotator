@@ -133,6 +133,8 @@ class App(tk.Tk):
         # Text widget to enter query
         self.queryText = tk.Text(master=queryFrame, width=40, height=10, borderwidth=4, relief="solid")
         self.queryText.pack(padx=20, pady=5)
+        self.queryText.config(font=('Helvetica bold', 14))
+
 
         # Label widget for query
         queryLabel = tk.Label(master=queryFrame, text='Query')
@@ -173,6 +175,7 @@ class App(tk.Tk):
         # Text widget to enter query
         self.annotationText = tk.Text(master=annotationFrame, state=tk.DISABLED, width=40, height=10, borderwidth=4, relief="solid")
         self.annotationText.pack(padx=20, pady=5)
+        self.annotationText.config(font=('Helvetica bold', 14))
 
         annotationLabel = tk.Label(master=annotationFrame, text='Annotation')
         annotationLabel.pack()
