@@ -91,6 +91,10 @@ class QEPAnnotator:
                     final_output += "Step " + str(steps) + ": " +  parser.unique_parser(hashMap[length][j]) + "\n"
                 elif hashMap[length][j]["Node Type"] == "Values Scan":
                     final_output += "Step " + str(steps) + ": " +  parser.values_scan_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "SetOp":
+                    final_output += "Step " + str(steps) + ": " +  parser.setop_parser(hashMap[length][j]) + "\n"
+                elif hashMap[length][j]["Node Type"] == "Append":
+                    final_output += "Step " + str(steps) + ": " +  parser.append_parser(hashMap[length][j]) + "\n"
                 else:
                     final_output += "Step " + str(steps) + ": " + "The output will be based on its node type " + str(hashMap[length][j]["Node Type"]) + "." + "\n"
                 steps+= 1
@@ -162,6 +166,40 @@ class Parser:
 
         return outputString
 
+    '''
+    Append Parser
+    '''
+
+    def append_parser(self, qep):
+        outputString = "This node will perform the combination of its child nodes  "
+
+        if "Plans" in qep:
+            for child in qep["Plans"]:
+                outputString += child["Node Type"] + ", "
+
+            outputString = outputString[:-2]
+
+        outputString += " into one result set"
+
+        return outputString
+
+    '''
+    SetOp Parser
+    '''
+    def setop_parser(self, qep):
+        outputString = "This node will perform SetOp Parsing. It finds the "
+
+        cmd_name = str(qep["Command"])
+
+        if cmd_name == "Except" or cmd_name == "Except All":
+            outputString += "differences"
+        
+        else:
+            outputString += "similarities"
+
+        outputString += " between the two previously scanned tables using the " + qep["Node Type"] + " operation."
+
+        return outputString
 
     '''
     Aggregate Parser
