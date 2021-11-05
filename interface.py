@@ -142,27 +142,27 @@ class App(tk.Tk):
         queryLabel['background'] = '#62c2da'
         queryLabel.config(font=('Helvetica bold', 14, "bold"))
 
-        #####################
-        # Frame for buttons #
-        #####################
+        # #####################
+        # # Frame for buttons #
+        # #####################
 
-        # Frame widget for buttons
-        buttonFrame = tk.Frame(master=topFrame)
-        buttonFrame.pack(side=tk.LEFT)
-        buttonFrame['background'] = '#62c2da'
+        # # Frame widget for buttons
+        # buttonFrame = tk.Frame(master=topFrame)
+        # buttonFrame.pack(side=tk.LEFT)
+        # buttonFrame['background'] = '#62c2da'
     
 
-        # Button widget to submit query
-        submitQueryButton = tk.Button(master=buttonFrame, text='Input Query', command=self.processQuery, foreground = 'white', height = 2, width = 20)
-        submitQueryButton.pack(pady=5)
-        submitQueryButton['background'] = '#063970'
-        submitQueryButton.config(font=('Calibri', 14, "bold"))
+        # # Button widget to submit query
+        # submitQueryButton = tk.Button(master=buttonFrame, text='Input Query', command=self.processQuery, foreground = 'white', height = 2, width = 20)
+        # submitQueryButton.pack(pady=5)
+        # submitQueryButton['background'] = '#063970'
+        # submitQueryButton.config(font=('Calibri', 14, "bold"))
 
-        # Button widget to clear query
-        clearQueryButton = tk.Button(master=buttonFrame, text='Clear', command=self.clearQuery, foreground = 'white', height = 2, width = 20)
-        clearQueryButton.pack(pady=5)
-        clearQueryButton['background'] = '#063970'
-        clearQueryButton.config(font=('Calibri', 14, "bold"))
+        # # Button widget to clear query
+        # clearQueryButton = tk.Button(master=buttonFrame, text='Clear', command=self.clearQuery, foreground = 'white', height = 2, width = 20)
+        # clearQueryButton.pack(pady=5)
+        # clearQueryButton['background'] = '#063970'
+        # clearQueryButton.config(font=('Calibri', 14, "bold"))
 
         ###################################
         # Frame for displaying annotation #
@@ -173,7 +173,7 @@ class App(tk.Tk):
         annotationFrame['background'] = '#62c2da'
 
         # Text widget to enter query
-        self.annotationText = tk.Text(master=annotationFrame, state=tk.DISABLED, width=40, height=10, borderwidth=4, relief="solid")
+        self.annotationText = tk.Text(master=annotationFrame, state=tk.DISABLED, width=60, height=10, borderwidth=4, relief="solid")
         self.annotationText.pack(padx=20, pady=5)
         self.annotationText.config(font=('Helvetica bold', 14))
 
@@ -186,12 +186,25 @@ class App(tk.Tk):
         # Frame for Database Schema #
         #############################
         schemaFrame = tk.Frame(master=bottomFrame)
-        schemaFrame.pack(side=tk.LEFT, anchor='s')
+        schemaFrame.pack(side=tk.LEFT)
         schemaFrame['background'] = '#62c2da'
+
+
+        # Button widget to submit query
+        submitQueryButton = tk.Button(master=schemaFrame, text='Submit Query', command=self.processQuery, foreground = 'white', height = 2, width = 20)
+        submitQueryButton.pack(pady=5)
+        submitQueryButton['background'] = '#063970'
+        submitQueryButton.config(font=('Calibri', 14, "bold"))
+
+        # Button widget to clear query
+        clearQueryButton = tk.Button(master=schemaFrame, text='Clear', command=self.clearQuery, foreground = 'white', height = 2, width = 20)
+        clearQueryButton.pack(pady=5)
+        clearQueryButton['background'] = '#063970'
+        clearQueryButton.config(font=('Calibri', 14, "bold"))
 
         # Button widget to open database schema window
         schemaButton = tk.Button(master=schemaFrame, text='Database Schema', command=self.goToSchema, foreground = 'white', height = 2, width = 20)
-        schemaButton.pack(pady=33)
+        schemaButton.pack(pady=5)
         schemaButton['background'] = '#063970'
         schemaButton.config(font=('Calibri', 14, "bold"))
 
@@ -209,7 +222,7 @@ class App(tk.Tk):
         treeLabel.config(font=('Helvetica bold', 14, "bold"))
 
         self.treeCanvas = tk.Canvas(treeFrame, width=700, height=500, borderwidth=4, relief="solid", highlightthickness=0)  
-        self.treeCanvas.pack(pady=5, padx=30)
+        self.treeCanvas.pack(pady=5, padx=15)
 
         self.img = ImageTk.PhotoImage(Image.open("images/blank.png"))  
         self.treeCanvas.create_image(0, 0, anchor=tk.NW, image=self.img)
