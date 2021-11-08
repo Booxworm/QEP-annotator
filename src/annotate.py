@@ -1,6 +1,4 @@
-from typing import final
-import preprocessing
-from collections import defaultdict, deque
+from collections import deque
 
 class QEPAnnotator:
 
