@@ -130,7 +130,7 @@ class QepGraph:
                         mode='markers',
                         name='bla',
                         marker=dict(symbol='diamond-wide',
-                                        size=100,
+                                        size=80,
                                         color='#6175c1',    #'#DB4551',
                                         line=dict(color='rgb(50,50,50)', width=1)
                                         ),

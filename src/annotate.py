@@ -434,11 +434,11 @@ class Parser:
         
         outputString = "This node performs sorting by using attribute "
         if "DESC" in qep["Sort Key"]:
-            outputString += qep["Sort Key"] + "in descending order."
+            outputString += qep["Sort Key"][0] + "in descending order."
         elif "INC" in qep["Sort Key"]:
-            outputString += qep["Sort Key"] + "in ascending order."
+            outputString += qep["Sort Key"][0] + "in ascending order."
         else:
-            outputString += qep["Sort Key"] + "."
+            outputString += qep["Sort Key"][0] + "."
 
         return outputString
 
