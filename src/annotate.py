@@ -240,7 +240,7 @@ class Parser:
             
                 outputString += tempString
 
-                return outputString
+            return outputString
         
         if qep["Strategy"] == "Plain":
             outputString = "The result will be aggregated based on a " + qep["Node Type"] + " function. "
