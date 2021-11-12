@@ -40,3 +40,11 @@ FROM region, nation
 WHERE r_regionkey = n_regionkey 
 LIMIT 5; 
 ```
+
+## Running the application
+Before running the app, ensure that all the requirements are installed.
+The application can then be run from project.py.
+```
+pip install -r requirements.txt
+python src/project.py
+```
